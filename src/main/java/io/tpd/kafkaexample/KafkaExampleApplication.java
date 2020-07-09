@@ -33,15 +33,11 @@ public class KafkaExampleApplication {
     private String topicName;
 
     // Producer configuration
-
     @Bean
     public Map<String, Object> producerConfigs() {
-        Map<String, Object> props =
-                new HashMap<>(kafkaProperties.buildProducerProperties());
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                JsonSerializer.class);
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildProducerProperties());
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return props;
     }
 
@@ -80,54 +76,56 @@ public class KafkaExampleApplication {
 //    }
 
     @Bean
-    public ConsumerFactory<String, Object> consumerFactory() {
+    public ConsumerFactory<String, Object> jsonConsumerFactory() {
         final JsonDeserializer<Object> jsonDeserializer = new JsonDeserializer<>();
         jsonDeserializer.addTrustedPackages("*");
         return new DefaultKafkaConsumerFactory<>(
-                kafkaProperties.buildConsumerProperties(), new StringDeserializer(), jsonDeserializer
-        );
+                kafkaProperties.buildConsumerProperties(),
+                new StringDeserializer(),
+                jsonDeserializer);
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(jsonConsumerFactory());
         return factory;
     }
 
-    // String Consumer Configuration
 
+    /**
+     * string 类型的消费这factory；
+     */
     @Bean
     public ConsumerFactory<String, String> stringConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(
-                kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new StringDeserializer()
-        );
+                kafkaProperties.buildConsumerProperties(),
+                new StringDeserializer(),
+                new StringDeserializer());
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerStringContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(stringConsumerFactory());
-
         return factory;
     }
 
-    // Byte Array Consumer Configuration
 
+    /**
+     * 字节 类型的消费这factory；
+     */
     @Bean
     public ConsumerFactory<String, byte[]> byteArrayConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(
-                kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new ByteArrayDeserializer()
-        );
+                kafkaProperties.buildConsumerProperties(),
+                new StringDeserializer(),
+                new ByteArrayDeserializer());
     }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, byte[]> kafkaListenerByteArrayContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, byte[]> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, byte[]> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(byteArrayConsumerFactory());
         return factory;
     }
